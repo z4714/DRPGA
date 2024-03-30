@@ -1,0 +1,31 @@
+{
+    'round': 0
+	'state_0': ''adversary_0': array([ 0.69437176, -1.4609686 ,  0.023015  , -0.97559977,  0.51697916,
+	-1.5288411 ,  1.0734879 , -0.19491644], dtype=float32), 'agent_0': array([ 0.17739256,  0.06787257,  0.17739256,  0.06787257, -0.4939642 ,
+	 0.5532414 , -0.51697916,  1.5288411 ,  0.55650866,  1.3339247 ],
+   dtype=float32), 'agent_1': array([-0.3791161 , -1.2660521 , -0.3791161 , -1.2660521 , -1.0504729 ,
+	-0.78068334, -1.0734879 ,  0.19491644, -0.55650866, -1.3339247 ],
+   dtype=float32)',
+	'actions_0': ''adversary_0': 2, 'agent_0': 4, 'agent_1': 3',
+	'state_1': ''adversary_0': array([ 0.69437176, -1.4609686 ,  0.023015  , -0.97559977,  0.51697916,
+	-1.5288411 ,  1.0734879 , -0.19491644], dtype=float32), 'agent_0': array([ 0.17739256,  0.06787257,  0.17739256,  0.06787257, -0.4939642 ,
+	 0.5532414 , -0.51697916,  1.5288411 ,  0.55650866,  1.3339247 ],
+   dtype=float32), 'agent_1': array([-0.3791161 , -1.2660521 , -0.3791161 , -1.2660521 , -1.0504729 ,
+	-0.78068334, -1.0734879 ,  0.19491644, -0.55650866, -1.3339247 ],
+   dtype=float32)',
+   'reward_0':'defaultdict(<class 'int'>, {'adversary_0': -1.6175850136777643, 'agent_0': 1.4276513321984416, 'agent_1': 1.4276513321984416})',
+   'adversary_0(Thief)':([],[],[],["It seems like this area is hiding many secrets. Have you found any clues?","Do you really think I'm so easily fooled? I know you have secrets, and I'll uncover the truth. But, maybe we can come to some sort of agreement—you give me some clues, and I can guarantee not to pose a threat to you once you find the treasure."])
+   'agent_0(Elf Wizard)':'([],[],["I feel like every step we take is being watched. That thief, 
+   	his network of informants is more extensive than we imagined. We need to be even more cautious in guarding this secret."],
+	["Indeed, exploring to the north seems to yield unexpected discoveries.",
+	"We're not ones to trust easily, especially someone like you, a thief. Our plan is to find that ancient city, not to share our discoveries with potential enemies. 
+   	However, we'll consider your proposal, as long as you can prove your sincerity first."])',
+   'agent_1(Human Warrior)':'([],
+   ["I agree. We must find a way to mislead him, to lead him away from the true treasure's location. Perhaps we can intentionally leak some false information, leading him to dangerous places."],
+   [],
+   ["I agree, there are certainly some noteworthy places to the north, but I think the east is also worth exploring.",
+   "And we have our own resources and means to protect ourselves. However, if you can truly assist us in our expedition, perhaps we can share some less critical information."])',
+   'order':'([0,1,2,1,2,0,1,2],[3,3],[2,3,3],[1,3,3])',
+    
+   
+}
