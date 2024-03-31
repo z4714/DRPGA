@@ -9,9 +9,9 @@ from datetime import datetime
 
 
 from pettingzoo.mpe import simple_adversary_v3
-from ..src.utils import rl_tools
-from ..models.maddpg.sa_maddpg import MADDPG
-from ..models.utils import persistence
+from src.utils import rl_tools
+from models.maddpg.sa_maddpg import MADDPG
+from models.utils import persistence
 
 
 max_cycles = 200
@@ -123,10 +123,9 @@ return_array = np.array(return_list)
 
 return_info = np.array([max_cycles,seed,num_episodes])
 
-np.savez(f'././evaluation/results/sa_maddpg/{current_time}.npz',return_array, return_info) 
+np.savez(f'././evaluation/results/sa_maddpg/{current_time}.npz',return_array=return_array, return_info=return_info) 
 
 
-#model = GPTLanguageModel()
-#m = model.to(device)
-# print the number of parameters in the model
-#print(sum(p.numel() for p in m.parameters())/1e6, 'M parameters')
+
+persistence.save_actor_critic(sa_maddpg, 'sa_maddpg')
+

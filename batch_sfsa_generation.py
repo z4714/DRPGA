@@ -3,17 +3,19 @@ import json
 import numpy as np
 import os
 import torch
-from ..src.maddpg_utils import SFSA_generator
-from ..models.maddpg.sa_maddpg import MADDPG
-from ..src.utils import rl_tools, model_utils
+from src.maddpg_utils import SFSA_generator
+from models.maddpg.sa_maddpg import MADDPG
+from src.utils import rl_tools, model_utils
 
 
-directory = "././data/SFSA_0200"
+directory = "./data/SFSA_0200"
 
 max_cycle = 200
 seed = -1
 
 test_env = simple_adversary_v3.parallel_env(max_cycles=max_cycle)
+observations, infos = test_env.reset() if seed == -1 else test_env.reset(seed=seed)
+
 
 
 test_agents = ['adversary_0', 'agent_0', 'agent_1']
@@ -58,14 +60,28 @@ sa_maddpg = sa_maddpg.to(device)
 
 
 
-params_date = ''
-maddpg_dir = f'././parameters/weights/sa_maddpg/{params_date}'
+
+weights_dir = './parameters/weights/sa_maddpg/'
+
+subdirs = [os.path.join(weights_dir, d) for d in os.listdir(weights_dir) if os.path.isdir(os.path.join(weights_dir, d))]
+
+
+dates = [d.split('/')[-1] for d in subdirs]
+
+latest_date = max(dates)
+
+spec_date = ''
+
+
+params_date = spec_date if spec_date else latest_date
+
+maddpg_dir = os.path.join(weights_dir, params_date)
 
 actor_params = []
 critic_params = []
 
-actor_params = model_utils.load_params(actor_params, f'{maddpg_dir}/actor')
-critic_params = model_utils.load_params(critic_params, f'{maddpg_dir}/critic')
+actor_params = model_utils.load_params(actor_params, os.path.join(maddpg_dir,'actor'))
+critic_params = model_utils.load_params(critic_params, os.path.join(maddpg_dir,'critic'))
 
 
 for i,ddpgs in enumerate(sa_maddpg.agents):
@@ -81,7 +97,7 @@ for i,ddpgs in enumerate(sa_maddpg.agents):
 print(sum(p.numel() for p in sa_maddpg.parameters())/1e6, 'M parameters in sa_maddpg')
 
 times = 1000
-for t in times:
+for t in range(times):
     SFSA_generator.sfsa_generator(test_env, test_agents, seed, sa_maddpg, max_cycle, directory, dialogues_and_order)
 
 

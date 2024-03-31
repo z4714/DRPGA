@@ -2,7 +2,7 @@ from pettingzoo.mpe import simple_adversary_v3
 import json
 import numpy as np
 import os
-import tools
+from ..maddpg_utils import tools
 
 def sfsa_generator(test_env, test_agents, seed, model, max_cycle, directory, dialogues_and_order):
 
@@ -57,9 +57,10 @@ def sfsa_generator(test_env, test_agents, seed, model, max_cycle, directory, dia
     filename = tools.generate_filename(directory, base_filename)
 
 
-    with open(filename, 'w') as json_file:
+    with open(f'{filename}.json', 'w') as json_file:
         json.dump(record_dict_cov, json_file, indent=2)
 
+    print(filename)
 
     return 
 

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import random
 from tqdm import tqdm
 import collections
-import rl_tools
+from src.utils import  rl_tools
 
 class TwoLayerFC(torch.nn.Module):
     def __init__(self, num_in, num_out, hidden_dim):
@@ -20,9 +20,10 @@ class TwoLayerFC(torch.nn.Module):
         return self.fc3(x)
 
 
-class DDPG:
+class DDPG(torch.nn.Module):
     def __init__(self, state_dim, action_dim, critic_input_dim, 
                  hidden_dim, actor_lr, critic_lr, device):
+        super().__init__()
         self.actor = TwoLayerFC(state_dim, action_dim, hidden_dim).to(device)
         self.target_actor = TwoLayerFC(state_dim, action_dim,hidden_dim).to(device)
         self.critic = TwoLayerFC(critic_input_dim, 1, hidden_dim).to(device)
@@ -48,10 +49,11 @@ class DDPG:
             param_target.data.copy_(param_target.data*(1.0-tau)+param.data*tau)
 
 
-class MADDPG:
+class MADDPG(torch.nn.Module):
     def __init__(self, env, device, actor_lr, critic_lr, 
                  hidden_dim, state_dims, action_dims, critic_input_dim, gamma, tau):
-        self.agents = []
+        super().__init__()
+        self.agents = torch.nn.ModuleList()
         for i in range(len(env.agents)):
             print("DDPG",state_dims[i], action_dims[i], 
                                     critic_input_dim, hidden_dim, actor_lr, 
