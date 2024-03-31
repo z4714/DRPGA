@@ -5,13 +5,17 @@ import matplotlib.pyplot as plt
 import random
 from tqdm import tqdm
 import collections
-from pettingzoo.mpe import simple_adversary_v3
-import rl_tools
-import models.maddpg.sa_maddpg as sa_maddpg
-import save_model
+from datetime import datetime
 
-env = simple_adversary_v3.parallel_env(max_cycles=96)
-observations, infos = env.reset(seed=42)
+
+from pettingzoo.mpe import simple_adversary_v3
+from ..src.utils import rl_tools
+from ..models.maddpg.sa_maddpg import MADDPG
+from ..models.utils import persistence
+
+
+max_cycles = 200
+seed = -1
 
 num_episodes = 100
 episode_length = 64 
@@ -27,6 +31,13 @@ print(device)
 update_interval = 32
 minimal_size = 15
 replay_buffer = rl_tools.ReplayBuffer(buffer_size)
+
+
+
+
+env = simple_adversary_v3.parallel_env(max_cycles=max_cycles)
+observations, infos = env.reset() if seed == -1 else env.reset(seed=seed)
+
 
 state_dims=[]
 action_dims=[]
@@ -44,9 +55,9 @@ print(action_dims)
 
 critic_input_dim = sum(state_dims) +sum(action_dims)
 
-sa_maddpg = sa_maddpg.MADDPG(env, device, actor_lr, critic_lr, hidden_dim, state_dims, action_dims, critic_input_dim, gamma, tau)
-
-
+sa_maddpg = MADDPG(env, device, actor_lr, critic_lr, hidden_dim, state_dims, action_dims, critic_input_dim, gamma, tau)
+sa_maddpg = sa_maddpg.to(device)
+print(sum(p.numel() for p in sa_maddpg.parameters())/1e6,'M parameters in sa_maddpg')
 
 return_list = [] 
 total_step = 0
@@ -58,7 +69,7 @@ agents = ['adversary_0', 'agent_0', 'agent_1']
 
 for i_episode in range(num_episodes):   
    
-    state, info = env.reset(seed= 42)
+    state, info = env.reset() if seed == -1 else env.reset(seed=seed)
 
     for e_i in range(episode_length):   
        
@@ -103,14 +114,19 @@ for i_episode in range(num_episodes):
     print("actions:", env_actions)
     print(f"Episode: {i_episode+1}, {ep_returns}")
   
- 
-    
-
-       
-            
+             
 env.close()
 
+current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+return_array = np.array(return_list)
+
+return_info = np.array([max_cycles,seed,num_episodes])
+
+np.savez(f'././evaluation/results/sa_maddpg/{current_time}.npz',return_array, return_info) 
 
 
-
-save_model.save_actor_critic(sa_maddpg)
+#model = GPTLanguageModel()
+#m = model.to(device)
+# print the number of parameters in the model
+#print(sum(p.numel() for p in m.parameters())/1e6, 'M parameters')
