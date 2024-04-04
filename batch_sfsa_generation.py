@@ -8,7 +8,7 @@ from models.maddpg.sa_maddpg import MADDPG
 from src.utils import rl_tools, model_utils
 
 
-directory = "./data/SFSA_0200"
+directory = "./data/SFSA_0200/sfsa_0200_01"
 
 max_cycle = 200
 seed = -1
