@@ -1,1 +1,0 @@
-现在有一个主题与DND类似的沙河游戏，里面三个角色，其中两个角色叫做agent_0和agent_1，另一个角色叫做adversary_0。adversary_1不知道目的地的位置，而agent_0与agent_1知道。三者都希望前往城市，但agent_0和agent_1需要想方设法阻止adversary_0知道城市的位置。我会给你reward、state的计算方式和含义，你需要根据我提供的信息填写我的json文件中的对话部分。json文件示例如SFSA_0200_000001所示。其中dialogue部分的[]表示了发言的目标对象，从第一个[]到第四个[]分别表示adversary_0, agent_0, agent_1, 全体。order表示了每一轮发言的顺序，0，1，2。
