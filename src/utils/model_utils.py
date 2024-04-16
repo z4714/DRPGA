@@ -7,3 +7,7 @@ def load_params(params, path):
             params.append(torch.load(os.path.join(path, filename)))
 
     return params
+
+def square_subsequent_mask(size):
+    mask = torch.triu(torch.ones(size,size)*float('-inf'),diagonal=1)
+    return mask

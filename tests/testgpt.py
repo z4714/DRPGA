@@ -1,4 +1,4 @@
-import tiny_gpt
+import models.gpms.tiny_gpt as tiny_gpt
 import llm_tools
 import torch
 
