@@ -50,7 +50,7 @@ class Fixpooling_TRTF(nn.Module):
         return output
     
 
-class paddingT_FTRTF(nn.Module):
+class paddingT_FTRTF_encoder(nn.Module):
     def __init__(self, vocab_size, d_model, nhead, num_layers, 
     d_ff, out_dim, max_seq_length=4096, dropout=0.1):
         super(Fixpooling_TRTF, self).__init__()
