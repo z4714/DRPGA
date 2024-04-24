@@ -1,5 +1,5 @@
 import models.gpms.tiny_gpt as tiny_gpt
-import llm_tools
+import src.utils.llm_tools as llm_tools
 import torch
 
 

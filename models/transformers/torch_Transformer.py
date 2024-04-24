@@ -53,7 +53,7 @@ class Fixpooling_TRTF(nn.Module):
 class paddingT_FTRTF_encoder(nn.Module):
     def __init__(self, vocab_size, d_model, nhead, num_layers, 
     d_ff, out_dim, max_seq_length=4096, dropout=0.1):
-        super(Fixpooling_TRTF, self).__init__()
+        super(paddingT_FTRTF_encoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, d_model)
         self.pos_encoder = nn.Parameter(torch.zeros(1,max_seq_length, d_model))
         encoder_layers = nn.TransformerEncoderLayer(d_model, nhead, d_ff, dropout)
@@ -68,7 +68,7 @@ class paddingT_FTRTF_encoder(nn.Module):
         src += self.pos_encoder[:, :src.size(1)]
 
         output = self.transformer_encoder(src, src_mask)
-        output = output.permute(1,2,0)
+        output = output.permute(0,2,1)
         output = self.pooling(output).squeeze(-1)
         output = self.out_layer(output)
         return output    
