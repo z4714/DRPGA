@@ -52,7 +52,7 @@ class Fixpooling_TRTF(nn.Module):
 
 class paddingT_FTRTF_encoder(nn.Module):
     def __init__(self, vocab_size, d_model, nhead, num_layers, 
-    d_ff, out_dim, max_seq_length=4096, dropout=0.1):
+    d_ff, out_dim, max_seq_length=512, dropout=0.1):
         super(paddingT_FTRTF_encoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, d_model)
         self.pos_encoder = nn.Parameter(torch.zeros(1,max_seq_length, d_model))
@@ -60,8 +60,8 @@ class paddingT_FTRTF_encoder(nn.Module):
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, num_layers)
         self.d_model = d_model
 
-        self.pooling = nn.AdaptiveAvgPool1d(out_dim)
-        self.out_layer = nn.Linear(d_model, out_dim)
+        #self.pooling = nn.AdaptiveAvgPool1d(out_dim)
+        self.out_layer = nn.Linear(d_model, vocab_size)
 
     def forward(self, src, src_mask=None):
         src = self.embedding(src) * math.sqrt(self.d_model)
@@ -69,7 +69,7 @@ class paddingT_FTRTF_encoder(nn.Module):
 
         output = self.transformer_encoder(src, src_mask)
         output = output.permute(0,2,1)
-        output = self.pooling(output).squeeze(-1)
+        #output = self.pooling(output).squeeze(-1)
         output = self.out_layer(output)
         return output    
 
