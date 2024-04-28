@@ -68,7 +68,7 @@ class paddingT_FTRTF_encoder(nn.Module):
         src += self.pos_encoder[:, :src.size(1)]
 
         output = self.transformer_encoder(src, src_mask)
-        output = output.permute(0,2,1)
+        #output = output.permute(0,2,1)
         #output = self.pooling(output).squeeze(-1)
         output = self.out_layer(output)
         return output    
