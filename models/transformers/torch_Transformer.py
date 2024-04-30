@@ -10,6 +10,9 @@ import time
 import math
 
 
+class nlu_tf(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
 
 class TRTF_encoder(nn.Module):
     def __init__(self, vocab_size, d_model, nhead, num_layers, 
