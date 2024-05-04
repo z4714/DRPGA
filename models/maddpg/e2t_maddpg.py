@@ -50,11 +50,11 @@ class DDPG(torch.nn.Module):
 
 
 class MADDPG(torch.nn.Module):
-    def __init__(self, env, device, actor_lr, critic_lr, 
+    def __init__(self, max_agents, device, actor_lr, critic_lr, 
                  hidden_dim, state_dims, action_dims, critic_input_dim, gamma, tau):
         super().__init__()
         self.agents = torch.nn.ModuleList()
-        for i in range(len(env.agents)):
+        for i in range(max_agents):
             print("DDPG",state_dims[i], action_dims[i], 
                                     critic_input_dim, hidden_dim, actor_lr, 
                                     critic_lr, device)
