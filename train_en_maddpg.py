@@ -57,7 +57,7 @@ critic_input_dim = sum(state_dims) +sum(action_dims)
 
 sa_maddpg = MADDPG(env, device, actor_lr, critic_lr, hidden_dim, state_dims, action_dims, critic_input_dim, gamma, tau)
 sa_maddpg = sa_maddpg.to(device)
-print(sum(p.numel() for p in sa_maddpg.parameters())/1e9,'M parameters in sa_maddpg')
+print(sum(p.numel() for p in sa_maddpg.parameters())/1e9,'B parameters in sa_maddpg')
 
 return_list = [] 
 total_step = 0
