@@ -1,11 +1,16 @@
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 import numpy as np
 import matplotlib.pyplot as plt
 import random
 from tqdm import tqdm
 import collections
+from transformers import BertTokenizer, BertModel
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from src.utils import  rl_tools
+from models.utils import tk_func
 
 class TwoLayerFC(torch.nn.Module):
     def __init__(self, num_in, num_out, hidden_dim):
@@ -20,19 +25,30 @@ class TwoLayerFC(torch.nn.Module):
         return self.fc3(x)
 
 
-class DDPG(torch.nn.Module):
-    def __init__(self, state_dim, action_dim, critic_input_dim, 
+class ENDDPG(torch.nn.Module):
+    def __init__(self, encoder, 
+                 tokenizer, tokenizer_fn, max_length,
+                 en_out_dim, redu_dim, state_dim, action_dim, critic_input_dim, 
                  hidden_dim, actor_lr, critic_lr, device):
         super().__init__()
-        self.actor = TwoLayerFC(state_dim, action_dim, hidden_dim).to(device)
-        self.target_actor = TwoLayerFC(state_dim, action_dim,hidden_dim).to(device)
-        self.critic = TwoLayerFC(critic_input_dim, 1, hidden_dim).to(device)
-        self.target_critic = TwoLayerFC(critic_input_dim, 1, hidden_dim).to(device)
+        self.encoder = encoder
+        self.tokenzer = tokenizer
+        self.tokenizer_fn = tokenizer_fn
+        self.max_length = max_length
+        self.encoder_reduction = TwoLayerFC(en_out_dim, redu_dim, en_out_dim/2)
+        self.actor = TwoLayerFC(state_dim, action_dim, hidden_dim)
+        self.target_actor = TwoLayerFC(state_dim, action_dim,hidden_dim)
+        self.critic = TwoLayerFC(critic_input_dim, 1, hidden_dim)
+        self.target_critic = TwoLayerFC(critic_input_dim, 1, hidden_dim)
         self.target_critic.load_state_dict(self.critic.state_dict())
         self.target_actor.load_state_dict(self.actor.state_dict())
-        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=actor_lr)
+        self.actor_optimizer = torch.optim.AdamW(self.actor.parameters(), lr=actor_lr)
         
-        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(),lr=critic_lr)
+        self.critic_optimizer = torch.optim.AdamW(self.critic.parameters(),lr=critic_lr)
+        self.tokenizer_fn_dict = {
+            "tokenizer_fn": tk_func.tokenizer_fn,
+            "collate_fn": tk_func.collate_fn,
+        }
         
     def take_action(self,state, explore=False):
         #print("state:",state)
@@ -44,23 +60,50 @@ class DDPG(torch.nn.Module):
             action = rl_tools.onehot_from_logits(action.unsqueeze(0))
         return action.detach().cpu().numpy()[0]
     
+    def actor_forward(self, state, desc):
+        desc = self.tokenzer(desc, max_length=self.max_length,padding="max_length", truncation=True, return_tensors="pt")
+        encoder_output = self.encoder(**desc)
+
+
+    def critic_forward(self, state, action):
+        return self.critic(torch.cat((state, action), dim=1))
+    
+    
     def soft_update(self, net, target_net, tau):
         for param_target, param in zip(target_net.parameters(), net.parameters()):
             param_target.data.copy_(param_target.data*(1.0-tau)+param.data*tau)
 
 
-class MADDPG(torch.nn.Module):
-    def __init__(self, max_agents, device, actor_lr, critic_lr, 
-                 hidden_dim, state_dims, action_dims, critic_input_dim, gamma, tau):
+class ENMADDPG(torch.nn.Module):
+    def __init__(self, tokenizer, 
+                 tokenizer_fn, max_length, 
+                 encoder, en_out_dim, 
+                 redu_dim, max_agents, 
+                 device, actor_lr, critic_lr, 
+                 hidden_dim, state_dims, action_dims, 
+                 critic_input_dim, gamma, tau):
         super().__init__()
         self.agents = torch.nn.ModuleList()
+        tokenizer_dict = {
+            "bert-base-uncased": BertTokenizer.from_pretrained("bert-base-uncased"),
+            "microsoft/codebert-base": AutoTokenizer.from_pretrained("microsoft/codebert-base"),
+            "gpt2": GPT2Tokenizer.from_pretrained("gpt2"),
+            "spt": '',
+            "glm": AutoTokenizer.from_pretrained("THUDM/chatglm3-6b-128k", trust_remote_code=True),
+        }
+
+        tokenizer = tokenizer_dict[tokenizer]
+
         for i in range(max_agents):
-            print("DDPG",state_dims[i], action_dims[i], 
+            print("ENDDPG",en_out_dim, redu_dim, state_dims[i], action_dims[i], 
                                     critic_input_dim, hidden_dim, actor_lr, 
                                     critic_lr, device)
-            self.agents.append(DDPG(state_dims[i], action_dims[i], 
-                                    critic_input_dim, hidden_dim, actor_lr, 
-                                    critic_lr, device))
+            self.agents.append(ENDDPG(encoder, 
+                                    tokenizer, tokenizer_fn, max_length,
+                                    en_out_dim, redu_dim, 
+                                    state_dims[i], action_dims[i], 
+                                    critic_input_dim, hidden_dim, 
+                                    actor_lr, critic_lr, device)).to(device)
         self.gamma = gamma
         self.tau = tau
         self.critic_criterion = torch.nn.MSELoss()
