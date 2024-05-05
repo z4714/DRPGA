@@ -20,5 +20,6 @@
     "ActionSpaces": {
         "Agent": "[no_action, move_left, move_right, move_down, move_up]",
         "Adversary": "[no_action, move_left, move_right, move_down, move_up]"
-    }
+    },
+    "Description": 
 }

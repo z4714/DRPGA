@@ -43,5 +43,24 @@ def format_data(data):
     formatted_data = []
     for round_num, round_info in data.items():
         formatted_round = {
-            'turn'
+            'turn': 'round_' + round_num,
+            'details': {
+                'state_' + round_num:{
+                    'adversary_0(Thief)': round_nested(round_info['state_'+round_num]['adversary_0']),
+                    'agent_0(Elf Wizard)': round_nested(round_info['state_'+round_num]['agent_0']),
+                    'agent_1(Human Warrior)': round_nested(round_info['state_'+round_num]['agent_1']),
+        
+                },
+                'actions_' + round_num: round_info['actions_'+round_num],
+                'reward_' + round_num: round_info['reward_'+round_num],
+                'state_' + str(int(round_num)+1):{
+                    'adversary_0(Thief)': round_nested(round_info['state_'+str(int(round_num)+1)]['adversary_0']),
+                    'agent_0(Elf Wizard)': round_nested(round_info['state_'+str(int(round_num)+1)]['agent_0']),
+                    'agent_1(Human Warrior)': round_nested(round_info['state_'+str(int(round_num)+1)]['agent_1']),
+                }
+                    
+                
+            }
         }
+        formatted_data.append(formatted_round)
+    return formatted_data
