@@ -2,15 +2,11 @@
     "AgentFunctions": [
         {
             "FunctionName": "agent_reward",
-            "RewardCalculation": "\n        shaped_reward = True\n        shaped_adv_reward = True\n\n        adversary_agents = self.adversaries(world)\n        if shaped_adv_reward:\n            adv_rew = sum(\n                np.sqrt(np.sum(np.square(a.state.p_pos - a.goal_a.state.p_pos)))\n                for a in adversary_agents\n            )\n        else:\n            adv_rew = 0\n            for a in adversary_agents:\n                if np.sqrt(np.sum(np.square(a.state.p_pos - a.goal_a.state.p_pos))) < 2 * a.goal_a.size:\n                    adv_rew -= 5\n\n        good_agents = self.good_agents(world)\n        if shaped_reward:\n            pos_rew = -min(\n                np.sqrt(np.sum(np.square(a.state.p_pos - a.goal_a.state.p_pos)))\n                for a in good_agents\n            )\n        else:\n            pos_rew = 0\n            if min(np.sqrt(np.sum(np.square(a.state.p_pos - a.goal_a.state.p_pos))) for a in good_agents) < 2 * agent.goal_a.size:\n                pos_rew += 5\n            pos_rew -= min(np.sqrt(np.sum(np.square(a.state.p_pos - a.goal_a.state.p_pos))) for a in good_agents)\n        return pos_rew + adv_rew"
-        },
-        {
-            "FunctionName": "adversary_reward",
-            "RewardCalculation": "\n        shaped_reward = True\n        if shaped_reward:\n            return -np.sqrt(np.sum(np.square(agent.state.p_pos - agent.goal_a.state.p_pos)))\n        else:\n            adv_rew = 0\n            if np.sqrt(np.sum(np.square(agent.state.p_pos - agent.goal_a.state.p_pos))) < 2 * agent.goal_a.size:\n                adv_rew += 5\n            return adv_rew"
+            "RewardCalculation": "def reward(self, agent, world): dist2 = np.sum(np.square(agent.state.p_pos - world.landmarks[0].state.p_pos)); return -dist2"
         },
         {
             "FunctionName": "observation",
-            "ObservationCalculation": "\n        entity_pos = []\n        for entity in world.landmarks:\n            entity_pos.append(entity.state.p_pos - agent.state.p_pos)\n        entity_color = []\n        for entity in world.landmarks:\n            entity_color.append(entity.color)\n        other_pos = []\n        for other in world.agents:\n            if other is not agent:\n                other_pos.append(other.state.p_pos - agent.state.p_pos)\n        if not agent.adversary:\n            return np.concatenate([agent.goal_a.state.p_pos - agent.state.p_pos] + entity_pos + other_pos)\n        else:\n            return np.concatenate(entity_pos + other_pos)"
+            "ObservationCalculation": "def observation(self, agent, world): entity_pos = [entity.state.p_pos - agent.state.p_pos for entity in world.landmarks]; return np.concatenate([agent.state.p_vel] + entity_pos)"
         }
     ],
     "ObservationSpaces": {
@@ -19,7 +15,6 @@
     },
     "ActionSpaces": {
         "Agent": "[no_action, move_left, move_right, move_down, move_up]",
-        "Adversary": "[no_action, move_left, move_right, move_down, move_up]"
     },
 
     "Descriptio": "In this environment a single agent sees a landmark position and is rewarded based on how close it gets to the landmark (Euclidean distance). This is not a multiagent environment, and is primarily intended for debugging purposes."

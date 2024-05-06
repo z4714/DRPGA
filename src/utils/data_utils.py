@@ -1,6 +1,6 @@
 import json
 import os
-
+from collections import OrderedDict
 
 
 def json2Tpath(data, path=""):
@@ -39,28 +39,34 @@ def round_nested(data):
         return data
     
 
-def format_data(data):
+def format_data_sfsa(data,agents):
     formatted_data = []
     for round_num, round_info in data.items():
-        formatted_round = {
-            'turn': 'round_' + round_num,
-            'details': {
-                'state_' + round_num:{
-                    'adversary_0(Thief)': round_nested(round_info['state_'+round_num]['adversary_0']),
-                    'agent_0(Elf Wizard)': round_nested(round_info['state_'+round_num]['agent_0']),
-                    'agent_1(Human Warrior)': round_nested(round_info['state_'+round_num]['agent_1']),
+        next_round = 'state_'+str(int(round_num) + 1)
+        curr_round = 'state_'+round_num
+        details = OrderedDict()
+        details['state'] = {
+                    agents[0]:round_nested(round_info[curr_round]['adversary_0']),
+                    agents[1]:round_nested(round_info[curr_round]['agent_0']),
+                    agents[2]:round_nested(round_info[curr_round]['agent_1']),
         
-                },
-                'actions_' + round_num: round_info['actions_'+round_num],
-                'reward_' + round_num: round_info['reward_'+round_num],
-                'state_' + str(int(round_num)+1):{
-                    'adversary_0(Thief)': round_nested(round_info['state_'+str(int(round_num)+1)]['adversary_0']),
-                    'agent_0(Elf Wizard)': round_nested(round_info['state_'+str(int(round_num)+1)]['agent_0']),
-                    'agent_1(Human Warrior)': round_nested(round_info['state_'+str(int(round_num)+1)]['agent_1']),
-                }
+        },
+        
+        details['actions'] = round_info['actions_'+round_num],
+        details['reward']= round_info['reward_'+round_num],
+
+        details['next_state'] ={
+                    agents[0]:round_nested(round_info[next_round]['adversary_0']),
+                    agents[1]:round_nested(round_info[next_round]['agent_0']),
+                    agents[2]:round_nested(round_info[next_round]['agent_1']),
+        }
                     
                 
-            }
+        formatted_round = {
+            'turn': 'round' + round_num,
+            'details': details,
+          
+ 
         }
         formatted_data.append(formatted_round)
     return formatted_data
