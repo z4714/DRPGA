@@ -1,0 +1,19 @@
+{
+    "AgentFunctions": {
+        "agent_reward": "def agent_reward(self, agent, world): rew = 0; shape = False; adversaries = self.adversaries(world); rew += sum(0.1 * np.sqrt(np.sum(np.square(agent.state.p_pos - adv.state.p_pos))) for adv in adversaries) if shape else 0; rew -= sum(10 for a in adversaries if agent.collide and self.is_collision(a, agent)); rew -= sum(bound(abs(agent.state.p_pos[p])) for p in range(world.dim_p)); return rew  # Agents are negatively rewarded if caught by adversaries",
+        "adversary_reward": "def adversary_reward(self, agent, world): rew = 0; shape = False; agents = self.good_agents(world); adversaries = self.adversaries(world); rew -= sum(0.1 * min(np.sqrt(np.sum(np.square(a.state.p_pos - adv.state.p_pos))) for a in agents) for adv in adversaries) if shape else 0; rew += sum(10 for ag in agents for adv in adversaries if agent.collide and self.is_collision(ag, adv)); return rew  # Adversaries are rewarded for collisions with agents",
+        "observation": "def observation(self, agent, world): entity_pos = [entity.state.p_pos - agent.state.p_pos for entity in world.landmarks if not entity.boundary]; comm = [other.state.c for other in world.agents if other is not agent]; other_pos = [other.state.p_pos - agent.state.p_pos for other in world.agents if other is not agent]; other_vel = [other.state.p_vel for other in world.agents if other is not agent and not other.adversary]; return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel)"
+      
+    },
+    "ObservationSpaces": {
+      "Agent": "[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities]",
+      "Adversary": "[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities]"
+    },
+    "ActionSpaces": {
+      "Agent": "[no_action, move_left, move_right, move_down, move_up]",
+      "Adversary": "[no_action, move_left, move_right, move_down, move_up]"
+    },
+    "Agents":"[adversary_0, adversary_1, adversary_2, agent_0]",
+    "Description": "This is a predator-prey environment. Good agents (green) are faster and receive a negative reward for being hit by adversaries (red) (-10 for each collision). Adversaries are slower and are rewarded for hitting good agents (+10 for each collision). Obstacles (large black circles) block the way. By default, there is 1 good agent, 3 adversaries and 2 obstacles.So that good agents don’t run to infinity, they are also penalized for exiting the area by the following function:def bound(x): return 0 if x < 0.9 else (x - 0.9) * 10 if x < 1.0 else min(np.exp(2 * x - 2), 10)"
+}
+  

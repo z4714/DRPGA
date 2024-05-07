@@ -1,0 +1,19 @@
+{
+    "AgentFunctions": {
+        "agent_reward": "",
+        "adversary_reward": "def reward(self, agent, world): a = world.agents[0]; dist2 = np.sum(np.square(a.goal_a.state.p_pos - a.goal_b.state.p_pos)); return -dist2  # squared distance from listener to landmark",
+        "observation": "def observation(self, agent, world): goal_color = agent.goal_b.color if agent.goal_b is not None else np.zeros(world.dim_color); entity_pos = [entity.state.p_pos - agent.state.p_pos for entity in world.landmarks]; comm = [other.state.c for other in world.agents if other is not agent and other.state.c is not None]; return np.concatenate([goal_color]) if not agent.movable else np.concatenate([agent.state.p_vel] + entity_pos + comm) if agent.silent else []"
+      
+    },
+    "ObservationSpaces": {
+      "Agent": "[goal_id]",
+      "Adversary": "[self_vel, all_landmark_rel_positions, communication]"
+    },
+    "ActionSpaces": {
+      "Agent": "[say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9]",
+      "Adversary": "[no_action, move_left, move_right, move_down, move_up]"
+    },
+    "Agents":"[speaker_0, listener_0]",
+    "Description": "This environment is similar to simple_reference, except that one agent is the ‘speaker’ (gray) and can speak but cannot move, while the other agent is the listener (cannot speak, but must navigate to correct landmark)."
+}
+  

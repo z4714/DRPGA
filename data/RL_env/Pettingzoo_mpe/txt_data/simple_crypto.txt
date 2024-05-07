@@ -1,22 +1,21 @@
 {
-    "AgentFunctions": [
-        {
-            "FunctionName": "agent_reward",
-            "RewardCalculation": "def reward(self, agent, world): dist2 = np.sum(np.square(agent.state.p_pos - world.landmarks[0].state.p_pos)); return -dist2"
-        },
-        {
-            "FunctionName": "observation",
-            "ObservationCalculation": "def observation(self, agent, world): entity_pos = [entity.state.p_pos - agent.state.p_pos for entity in world.landmarks]; return np.concatenate([agent.state.p_vel] + entity_pos)"
-        }
-    ],
+    "AgentFunctions": {
+        "agent_reward": "def agent_reward(self, agent, world): good_listeners, adversaries = self.good_listeners(world), self.adversaries(world); good_rew, adv_rew = 0, 0; good_rew = sum(0 if (a.state.c == np.zeros(world.dim_c)).all() else -np.sum(np.square(a.state.c - agent.goal_a.color)) for a in good_listeners); adv_rew = sum(0 if (a.state.c == np.zeros(world.dim_c)).all() else np.sum(np.square(a.state.c - agent.goal_a.color)) for a in adversaries); return adv_rew + good_rew  # Agents rewarded if Bob can reconstruct message, but adversary (Eve) cannot",
+        "adversary_reward": "def adversary_reward(self, agent, world): rew = 0; rew -= np.sum(np.square(agent.state.c - agent.goal_a.color)) if not (agent.state.c == np.zeros(world.dim_c)).all() else 0; return rew  # Adversary (Eve) is rewarded if it can reconstruct original goal",
+
+        "observation": "def observation(self, agent, world): goal_color = agent.goal_a.color if agent.goal_a is not None else np.zeros(world.dim_color); entity_pos = [entity.state.p_pos - agent.state.p_pos for entity in world.landmarks]; comm = [other.state.c for other in world.agents if other is not agent and other.state.c is not None and other.speaker]; key = world.agents[2].key; return np.concatenate([goal_color] + [key]) if agent.speaker else np.concatenate([key] + comm) if not agent.adversary else np.concatenate(comm)"
+      
+    },
     "ObservationSpaces": {
-        "Agent_Alice": "[message, private_key]",
-        "Agent_Alice": "[message, private_key]",
-        
+      "Alice": "[message, private_key]",
+      "Bob": "[private_key, alices_comm]",
+      "Eve": "[alices_comm]"
     },
     "ActionSpaces": {
-        "Agent": "[no_action, move_left, move_right, move_down, move_up]",
+      "Agent": "[say_0, say_1, say_2, say_3]"
+     
     },
-
-    "Descriptio": "In this environment, there are 2 good agents (Alice and Bob) and 1 adversary (Eve). Alice must sent a private 1 bit message to Bob over a public channel. Alice and Bob are rewarded +2 if Bob reconstructs the message, but are rewarded -2 if Eve reconstruct the message (that adds to 0 if both teams reconstruct the bit). Eve is rewarded -2 based if it cannot reconstruct the signal, zero if it can. Alice and Bob have a private key (randomly generated at beginning of each episode) which they must learn to use to encrypt the message."
-}
+    "Agents":"[eve_0, bob_0, alice_0]",
+    "Description": "In this environment, there are 2 good agents (Alice and Bob) and 1 adversary (Eve). Alice must sent a private 1 bit message to Bob over a public channel. Alice and Bob are rewarded +2 if Bob reconstructs the message, but are rewarded -2 if Eve reconstruct the message (that adds to 0 if both teams reconstruct the bit). Eve is rewarded -2 based if it cannot reconstruct the signal, zero if it can. Alice and Bob have a private key (randomly generated at beginning of each episode) which they must learn to use to encrypt the message."
+  }
+  

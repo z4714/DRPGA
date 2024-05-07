@@ -1,0 +1,19 @@
+{
+    "AgentFunctions": {
+        "agent_reward": "def agent_reward(self, agent, world): return -np.sqrt(np.sum(np.square(agent.state.p_pos - agent.goal_a.state.p_pos)))  # the distance to the goal",
+        "adversary_reward": "def adversary_reward(self, agent, world): agent_dist = [np.sqrt(np.sum(np.square(a.state.p_pos - a.goal_a.state.p_pos))) for a in world.agents if not a.adversary]; pos_rew = min(agent_dist); neg_rew = np.sqrt(np.sum(np.square(agent.goal_a.state.p_pos - agent.state.p_pos))); return pos_rew - neg_rew  # keep the nearest good agents away from the goal",
+        "observation": "def observation(self, agent, world): entity_pos = [entity.state.p_pos - agent.state.p_pos for entity in world.landmarks]; entity_color = [entity.color for entity in world.landmarks]; comm, other_pos = [], [other.state.p_pos - agent.state.p_pos for other in world.agents if other is not agent]; comm = [other.state.c for other in world.agents if other is not agent]; return np.concatenate([agent.state.p_vel] + [agent.goal_a.state.p_pos - agent.state.p_pos] + [agent.color] + entity_pos + entity_color + other_pos) if not agent.adversary else np.concatenate([agent.state.p_vel] + entity_pos + other_pos)"
+      
+    },
+    "ObservationSpaces": {
+      "Agent": "[self_vel, goal_rel_position, goal_landmark_id, all_landmark_rel_positions, landmark_ids, other_agent_rel_positions]",
+      "Adversary": "[self_vel, all_landmark_rel_positions, other_agent_rel_positions]"
+    },
+    "ActionSpaces": {
+      "Agent": "[no_action, move_left, move_right, move_down, move_up]",
+      "Adversary": "[no_action, move_left, move_right, move_down, move_up]"
+    },
+    "Agents":"[adversary_0, agent_0]",
+    "Description": "This environment has 1 good agent, 1 adversary, and 1 landmark. The good agent is rewarded based on the distance to the landmark. The adversary is rewarded if it is close to the landmark, and if the agent is far from the landmark (the difference of the distances). Thus the adversary must learn to push the good agent away from the landmark."
+  }
+  

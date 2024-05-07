@@ -1,0 +1,19 @@
+{
+    "AgentFunctions": {
+        "agent_reward": "def reward(self, agent, world): agent_reward = 0.0 if agent.goal_a is None or agent.goal_b is None else np.sqrt(np.sum(np.square(agent.goal_a.state.p_pos - agent.goal_b.state.p_pos))); return -agent_reward \n def global_reward(self, world): all_rewards = sum(self.reward(agent, world) for agent in world.agents); return all_rewards / len(world.agents)",
+        "adversary_reward": "",
+        "observation": "def observation(self, agent, world): goal_color = [np.zeros(world.dim_color), np.zeros(world.dim_color)]; goal_color[1] = agent.goal_b.color if agent.goal_b is not None else goal_color[1]; entity_pos = [entity.state.p_pos - agent.state.p_pos for entity in world.landmarks]; entity_color = [entity.color for entity in world.landmarks]; comm = [other.state.c for other in world.agents if other is not agent]; return np.concatenate([agent.state.p_vel] + entity_pos + [goal_color[1]] + comm)"
+      
+    },
+    "ObservationSpaces": {
+      "Agent": "[self_vel, all_landmark_rel_positions, landmark_ids, goal_id, communication]",
+      "Adversary": "[]"
+    },
+    "ActionSpaces": {
+      "Agent": "[say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9] X [no_action, move_left, move_right, move_down, move_up]",
+      "Adversary": "[]"
+    },
+    "Agents":"[agent_0, agent_1]",
+    "Description": "This environment has 2 agents and 3 landmarks of different colors. Each agent wants to get closer to their target landmark, which is known only by the other agents. Both agents are simultaneous speakers and listeners.Locally, the agents are rewarded by their distance to their target landmark. Globally, all agents are rewarded by the average distance of all the agents to their respective landmarks. The relative weight of these rewards is controlled by the local_ratio parameter."
+}
+  
