@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import random
 from tqdm import tqdm
 import collections
+from src.utils.model_utils import pad_to_shape
 
 
 def onehot_from_logits(logits, eps=0.01):
@@ -69,6 +70,26 @@ def evaluate(env, maddpg, n_episode=10, episode_length=25):
     returns /= n_episode   
     return returns.tolist()
 
+def en_evaluate(env, maddpg, desc, env_action_dims,used_agents, n_episode=10, episode_length=25):
+
+    returns = np.zeros(len(used_agents))
+
+    for _ in range(n_episode):
+        obs, info = env.reset()
+        obs_padded = {
+        agent_name: pad_to_shape(obs[agent_name], agent.obs_shape)
+        for agent_name, agent in zip(obs.keys(), maddpg.agents)
+        }
+        for t_i in range(episode_length):
+            actions = maddpg.take_action(obs_padded,desc,env_action_dims,used_agents, explore=False)
+
+            e_acts = {agent: np.argmax(action) for agent, action in zip(env.agents, actions)}
+            obs, rew, done,trun, info = env.step(e_acts)
+            rew_value = np.array(list(rew.values()),dtype=np.float64)
+            #print(rew_value)
+            returns += np.mean(rew_value) 
+    returns /= n_episode   
+    return returns.tolist()
 
 class ReplayBuffer:
     def __init__(self, capacity):
