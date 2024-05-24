@@ -72,7 +72,7 @@ def evaluate(env, maddpg, n_episode=10, episode_length=25):
 
 def en_evaluate(env, maddpg, desc, env_action_dims,used_agents, n_episode=10, episode_length=25):
 
-    returns = np.zeros(len(used_agents))
+    returns = np.zeros(used_agents)
 
     for _ in range(n_episode):
         obs, info = env.reset()
@@ -87,7 +87,7 @@ def en_evaluate(env, maddpg, desc, env_action_dims,used_agents, n_episode=10, ep
             obs, rew, done,trun, info = env.step(e_acts)
             rew_value = np.array(list(rew.values()),dtype=np.float64)
             #print(rew_value)
-            returns += np.mean(rew_value) 
+            returns += rew_value
     returns /= n_episode   
     return returns.tolist()
 
